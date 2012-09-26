@@ -1,0 +1,123 @@
+* {
+  box-sizing: border-box; }
+
+html, body, h1, h2, h3, p, ul, li {
+  margin: 0;
+  padding: 0; }
+
+.row, .col {
+  overflow: hidden;
+  position: absolute; }
+
+.row {
+  left: 0;
+  right: 0; }
+
+.col {
+  top: 0;
+  bottom: 0; }
+
+.scroll-x {
+  overflow-x: auto; }
+
+.scroll-y {
+  overflow-y: auto; }
+
+body, input[type=text] {
+  font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
+  font-size: 16px; }
+
+body {
+  line-height: 1.3; }
+
+input[type=text] {
+  padding: 5px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  -webkit-transition: all 0.2s ease; }
+  input[type=text]:focus {
+    position: relative;
+    top: -1px;
+    outline: none;
+    border-color: #99f;
+    box-shadow: 0 1px 0 0 #99f; }
+
+a:link {
+  color: #77f; }
+
+a:visited {
+  color: #f7f; }
+
+a:hover {
+  color: #55f; }
+
+.header {
+  padding: 0.5em 0;
+  text-align: center;
+  font-size: 4em;
+  font-weight: 200;
+  letter-spacing: -0.05em; }
+
+.viewport {
+  position: absolute;
+  overflow: hidden;
+  top: 8em;
+  bottom: 0;
+  left: 0;
+  right: 0; }
+
+.sidebar {
+  left: 0;
+  width: 20%; }
+
+.content {
+  left: 20%;
+  right: 0; }
+
+.chatarea-wrapper {
+  top: 0;
+  bottom: 56px; }
+
+.input {
+  height: 46px;
+  bottom: 0; }
+
+.sidebar, .content {
+  float: left;
+  padding: 10px; }
+
+.sidebar {
+  width: 20%; }
+
+.content {
+  width: 80%;
+  height: 100%; }
+
+.sidebar h3 {
+  font-size: 1.2em;
+  text-transform: uppercase; }
+
+.sidebar ul {
+  list-style: none;
+  margin-left: 0.5em; }
+
+.users li {
+  border-right: 3px solid #fff; }
+
+.users .you {
+  border-right-color: #99f; }
+
+.chatarea {
+  display: table; }
+  .chatarea .post {
+    display: table-row; }
+  .chatarea .author, .chatarea .entry {
+    display: table-cell; }
+  .chatarea .author {
+    padding-right: 0.5em; }
+
+.chatarea, .input {
+  margin-right: 10px; }
+
+.chatinput {
+  width: 100%; }
