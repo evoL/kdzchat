@@ -74,6 +74,14 @@ io.sockets.on 'connection', (socket) ->
 
         socket.broadcast.emit('user connected', data)
 
+    socket.on 'change nick', (data) ->
+        data.oldNick = socket.user.nick
+
+        socket.user.nick = data.nick
+        users[data.id].nick = data.nick
+
+        socket.broadcast.emit('nick changed', data)
+
     socket.on 'disconnect', ->
         delete users[socket.user.id]
         io.sockets.emit('user disconnected', socket.user.id)

@@ -1,74 +1,72 @@
-# socket = io.connect('http://localhost:8888')
-
-# socket.on 'news', (data) ->
-#     console.log data
-#     socket.emit('some event', {data: 'data'})
-
-class @User extends Spine.Model
+class User extends Spine.Model
     @configure 'User', 'id', 'nick', 'current'
 
     validate: ->
-        unless @nick.match(/^[\w\-]+$/)
-            "The nick should only contain alphanumeric characters, hyphens and underscores"
+        unless /^[\w\-]+$/.test(@nick)
+            return "The nick should only contain alphanumeric characters, hyphens and underscores."
 
         if User.findByAttribute('nick', @nick)
-            'This user already exists'
+            return 'This user already exists.'
 
-class @Message extends Spine.Model
+class Message extends Spine.Model
     @configure 'Message', 'authorId', 'content'
+
+    constructor: ->
+        super
+
+        match = @content.match(/^\/(\w+)\s+(.+)$/)
+        if match
+            @metadata = {command: match[1], argument: match[2]}        
+
+    isSystemMessage: -> @metadata?
 
     validate: ->
         unless User.exists(@authorId)
-            "The user doesn't exist"
+            "The user doesn't exist."
 
-# class SocketTransport
-#     constructor: ->
+class SystemMessage extends Spine.Model
+    @configure 'SystemMessage', 'authorId', 'content'    
 
+    isSystemMessage: -> true
 
-# class SocketHandler
-#     constructor: ->
-#         @socket = io.connect(location.origin)
-#         @socket.on 'server', @process
+    validate: ->
+        unless User.exists(@authorId)
+            "The user doesn't exist."
 
-#     onDisconnect: (fn) ->
-#         @socket.on('disconnect', fn)
+##################################
 
-#     send: (packet) ->
-#         @socket.emit 'client', packet
-
-#     process: (data) =>
-#         console.log data
-
-#         throw "No model specified" unless data.model?
-
-#         switch data.model
-#             when 'User'
-#                 switch data.event
-#                     when 'create'
-#                         data.record.current = false
-#                         User.create data.record unless User.exists(data.record.id)
-#                     when 'update'
-#                         data.record.current = false
-#                         User.update data.id, data.record
-#                     when 'destroy'
-#                         User.destroy data.id
-#                     else
-#                         throw 'Unknown event for User: ' + data.event
-#             when 'Message'
-#                 Message.create data.record unless Message.exists(data.record.id)
-#             else
-#                 throw 'Unknown model specified: ' + data.model
-
-###################
+socket = io.connect()
 
 class Messages extends Spine.Controller
     constructor: ->
         super
         @el.addClass 'post'
+        @el.addClass 'system' if @message.isSystemMessage()
+
+    messageContent: ->
+        return @processMessage(@message.content) unless @message.isSystemMessage()
+
+        metadata = @message.metadata
+
+        return @processMessage(@message.content) unless metadata
+
+        switch metadata.command
+            when 'nick'
+                user = User.find(@message.authorId)
+                user.nick = metadata.argument
+
+                if user.save()
+                    socket.emit 'change nick', {id: @message.authorId, nick: metadata.argument}
+                    "is now called " + Mustache.escape(metadata.argument)
+                else
+                    msg = user.validate()
+                    "could not change his nick. " + msg
+            else
+                "tried to use an unknown command"
 
     data: ->
         author: User.find(@message.authorId).nick
-        content: @processMessage(@message.content)
+        content: @messageContent()
 
     processMessage: (text) ->
         rx = /((?:http|https):&#x2F;&#x2F;)?([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?/ig
@@ -107,32 +105,43 @@ class ChatApp extends Spine.Controller
 
     constructor: ->
         super
+        @input.focus()
+
         Message.bind('create', @addMessage)
+        SystemMessage.bind('create', @addMessage)
 
         @users = new UserList(el: @userlist)
 
-        @socket = io.connect()
-        @socket.on 'connect', =>
-            @socket.emit 'add user', {nick: @randomizeNick()}, (data, users) =>
+        socket.on 'connect', =>
+            socket.emit 'add user', {nick: @randomizeNick()}, (data, users) =>
                 @user = User.create(id: data.id, nick: data.nick, current: true)
 
                 for uid, userdata of users
                     if uid != data.id
                         User.create(id: userdata.id, nick: userdata.nick, current: false)
 
-        @socket.on 'user connected', (data) ->
+        socket.on 'user connected', (data) =>
             data.current = false
             User.create data unless User.exists(data.id)
-        @socket.on 'user disconnected', (uid) ->
+
+            SystemMessage.create(authorId: data.id, content: 'has just connected')
+        socket.on 'user disconnected', (uid) ->
             User.destroy uid
 
-        @socket.on 'chat', (msg) ->
+            # SystemMessage.create(authorId: data.id, content: 'has disconnected')
+        socket.on 'nick changed', (data) ->
+            User.update data.id, nick: data.nick
+
+            SystemMessage.create(authorId: data.id, content: 'has changed his nick from ' + data.oldNick)
+
+        socket.on 'chat', (msg) ->
             Message.create msg
 
     submit: (e) ->
         e.preventDefault()
-        Message.create(authorId: @user.id, content: @input.val())
-        @socket.emit 'chat', {content: @input.val()}
+        msg = Message.create(authorId: @user.id, content: @input.val())
+        unless msg.isSystemMessage()
+            socket.emit 'chat', {content: @input.val()}
 
         @input.val('')
 

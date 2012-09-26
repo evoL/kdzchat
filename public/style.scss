@@ -106,6 +106,10 @@ a:hover {
 .chatarea {
     display: table;
     .post { display: table-row; }
+    .post.system {
+        color: #999;
+        font-style: italic;
+    }
 
     .author, .entry { display: table-cell; }
 

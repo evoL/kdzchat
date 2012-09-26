@@ -111,6 +111,9 @@ a:hover {
   display: table; }
   .chatarea .post {
     display: table-row; }
+  .chatarea .post.system {
+    color: #999;
+    font-style: italic; }
   .chatarea .author, .chatarea .entry {
     display: table-cell; }
   .chatarea .author {

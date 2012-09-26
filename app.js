@@ -100,6 +100,12 @@
       ack(data, users);
       return socket.broadcast.emit('user connected', data);
     });
+    socket.on('change nick', function(data) {
+      data.oldNick = socket.user.nick;
+      socket.user.nick = data.nick;
+      users[data.id].nick = data.nick;
+      return socket.broadcast.emit('nick changed', data);
+    });
     socket.on('disconnect', function() {
       delete users[socket.user.id];
       io.sockets.emit('user disconnected', socket.user.id);
