@@ -111,13 +111,13 @@
       switch (metadata.command) {
         case 'nick':
           user = User.find(this.message.authorId);
-          user.nick = metadata.argument;
+          user.nick = metadata.argument.replace(/\s+$/, '');
           if (user.save()) {
             socket.emit('change nick', {
               id: this.message.authorId,
-              nick: metadata.argument
+              nick: user.nick
             });
-            return "is now called " + Mustache.escape(metadata.argument);
+            return "is now called " + Mustache.escape(user.nick);
           } else {
             msg = user.validate();
             return "could not change his nick. " + msg;

@@ -1,4 +1,8 @@
-* { box-sizing: border-box; }
+* { 
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 html, body, h1, h2, h3, p, ul, li { margin: 0; padding: 0; }
 
 .row, .col { overflow: hidden; position: absolute; }
@@ -21,6 +25,9 @@ input[type=text] {
     border: 1px solid #aaa;
     border-radius: 5px;
     -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    transition: all 0.2s ease;
 
     &:focus {
         position: relative;
@@ -67,27 +74,20 @@ a:hover {
     right: 0;
 }
 .chatarea-wrapper {
-    top: 0;
-    bottom: 56px;
+    top: 10px;
+    bottom: 66px;
 }
 .input {
     height: 46px;
     bottom: 0;
 }
 
-.sidebar, .content { float: left; padding: 10px; }
-
-.sidebar {
-    width: 20%;
-}
-.content {
-    width: 80%;
-    height: 100%;
-}
-
 // styling
-
+.sidebar {
+    padding-left: 10px;
+}
 .sidebar h3 {
+    margin-top: 10px;
     font-size: 1.2em;
     text-transform: uppercase;
 }
@@ -100,10 +100,12 @@ a:hover {
     border-right: 3px solid #fff;
 }
 .users .you {
+    color: #99f; 
     border-right-color: #99f;
 }
 
 .chatarea {
+    margin: 0 10px;
     display: table;
     .post { display: table-row; }
     .post.system {
@@ -121,4 +123,35 @@ a:hover {
 .chatarea, .input {
     margin-right: 10px;
 }
+.input { padding-top: 2px; margin-left: 10px; }
 .chatinput { width: 100%; }
+
+// responsiveness
+@media all and (max-width: 600px) {
+    .header { display: none; }
+    .viewport { top: 0; }
+    .sidebar {
+        top: 0;
+        bottom: auto;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        width: auto;
+
+        h3 { display: inline; }
+    }
+    .content {
+        top: 4em;
+        left: 0; 
+        right: 0;
+    }
+
+    .users {
+        position: relative;
+        top: -1px;
+    }
+
+    .users,
+    .users li { display: inline; margin-right: 3px; }
+    .users .you { border-right: none; }
+}

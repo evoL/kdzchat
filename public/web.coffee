@@ -53,11 +53,11 @@ class Messages extends Spine.Controller
         switch metadata.command
             when 'nick'
                 user = User.find(@message.authorId)
-                user.nick = metadata.argument
+                user.nick = metadata.argument.replace(/\s+$/, '')
 
                 if user.save()
-                    socket.emit 'change nick', {id: @message.authorId, nick: metadata.argument}
-                    "is now called " + Mustache.escape(metadata.argument)
+                    socket.emit 'change nick', {id: @message.authorId, nick: user.nick}
+                    "is now called " + Mustache.escape(user.nick)
                 else
                     msg = user.validate()
                     "could not change his nick. " + msg
