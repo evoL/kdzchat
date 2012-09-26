@@ -84,7 +84,7 @@
 
   })(Spine.Model);
 
-  socket = io.connect();
+  socket = io.connect("" + location.protocol + "//" + location.hostname + ":8999");
 
   Messages = (function(_super) {
 

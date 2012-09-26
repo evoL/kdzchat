@@ -35,7 +35,7 @@ class SystemMessage extends Spine.Model
 
 ##################################
 
-socket = io.connect()
+socket = io.connect("#{location.protocol}//#{location.hostname}:8999")
 
 class Messages extends Spine.Controller
     constructor: ->

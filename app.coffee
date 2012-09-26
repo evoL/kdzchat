@@ -64,8 +64,6 @@ users = {}
 counter = 0
 
 io.sockets.on 'connection', (socket) ->
-    console.log("[SIO] A new connection!")
-
     socket.on 'add user', (data, ack) ->
         data.id = 'user-' + counter++
         socket.user = data
@@ -92,5 +90,6 @@ io.sockets.on 'connection', (socket) ->
             authorId: socket.user.id
             content: data.content
 
-############### finish
-server.listen(8888)
+################ proxy
+
+server.listen(8999)

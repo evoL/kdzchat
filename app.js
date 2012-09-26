@@ -92,7 +92,6 @@
   counter = 0;
 
   io.sockets.on('connection', function(socket) {
-    console.log("[SIO] A new connection!");
     socket.on('add user', function(data, ack) {
       data.id = 'user-' + counter++;
       socket.user = data;
@@ -119,6 +118,6 @@
     });
   });
 
-  server.listen(8888);
+  server.listen(8999);
 
 }).call(this);
