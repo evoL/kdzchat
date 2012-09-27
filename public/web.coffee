@@ -154,6 +154,7 @@ class ChatApp extends Spine.Controller
 
                     SystemMessage.create(target: oldNick, content: 'is now called ' + @user.nick)
                 else
+                    @user.nick = oldNick
                     SystemMessage.create(target: oldNick, content: 'could not change his nick. ' + @user.validate())
             else
                 SystemMessage.create(target: @user.nick, content: 'tried to use an unknown command')

@@ -291,6 +291,7 @@
               content: 'is now called ' + this.user.nick
             });
           } else {
+            this.user.nick = oldNick;
             return SystemMessage.create({
               target: oldNick,
               content: 'could not change his nick. ' + this.user.validate()
