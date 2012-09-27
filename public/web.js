@@ -315,7 +315,8 @@
     };
 
     ChatApp.prototype.focusRestored = function() {
-      return document.title = this.baseTitle;
+      document.title = this.baseTitle;
+      return this.unread = 0;
     };
 
     ChatApp.prototype.notify = function() {

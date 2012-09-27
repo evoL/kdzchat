@@ -165,6 +165,7 @@ class ChatApp extends Spine.Controller
 
     focusRestored: ->
         document.title = @baseTitle
+        @unread = 0
 
     notify: ->
         document.title = "(#{++@unread}) #{@baseTitle}"
