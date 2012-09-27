@@ -192,7 +192,7 @@
       this.socket = io.connect("" + location.protocol + "//" + location.hostname + ":8999");
       this.socket.on('connect', function() {
         return _this.socket.emit('add user', {
-          nick: _this.randomizeNick()
+          nick: _this.getNick()
         }, function(data, users) {
           var uid, userdata, _results;
           _this.user = User.create({
@@ -283,6 +283,9 @@
               id: this.user.id,
               nick: this.user.nick
             });
+            if (localStorage) {
+              localStorage.setItem('nick', this.user.nick);
+            }
             return SystemMessage.create({
               target: oldNick,
               content: 'is now called ' + this.user.nick
@@ -318,6 +321,20 @@
     ChatApp.prototype.notify = function() {
       document.title = "(" + (++this.unread) + ") " + this.baseTitle;
       return this.sound.play();
+    };
+
+    ChatApp.prototype.getNick = function() {
+      var nick;
+      if (localStorage && localStorage.getItem('nick')) {
+        nick = localStorage.getItem('nick');
+        if (User.findByAttribute('nick', nick)) {
+          return this.randomizeNick();
+        } else {
+          return nick;
+        }
+      } else {
+        return this.randomizeNick();
+      }
     };
 
     ChatApp.prototype.randomizeNick = function() {

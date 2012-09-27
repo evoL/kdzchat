@@ -102,7 +102,7 @@ class ChatApp extends Spine.Controller
         @socket = io.connect("#{location.protocol}//#{location.hostname}:8999")
 
         @socket.on 'connect', =>
-            @socket.emit 'add user', {nick: @randomizeNick()}, (data, users) =>
+            @socket.emit 'add user', {nick: @getNick()}, (data, users) =>
                 @user = User.create(id: data.id, nick: data.nick, current: true)
 
                 for uid, userdata of users
@@ -149,6 +149,8 @@ class ChatApp extends Spine.Controller
 
                 if @user.save()
                     @socket.emit 'change nick', {id: @user.id, nick: @user.nick}
+                    if localStorage
+                        localStorage.setItem('nick', @user.nick)
 
                     SystemMessage.create(target: oldNick, content: 'is now called ' + @user.nick)
                 else
@@ -167,6 +169,16 @@ class ChatApp extends Spine.Controller
     notify: ->
         document.title = "(#{++@unread}) #{@baseTitle}"
         @sound.play()
+
+    getNick: ->
+        if localStorage && localStorage.getItem('nick')
+            nick = localStorage.getItem('nick')
+            if User.findByAttribute('nick', nick)
+                @randomizeNick()
+            else
+                nick
+        else
+            @randomizeNick()
 
     randomizeNick: ->
         index = Math.floor(Math.random() * 100000);
