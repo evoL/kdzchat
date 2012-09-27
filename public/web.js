@@ -99,8 +99,8 @@
 
     MessageView.prototype.processMessage = function(text) {
       var rx;
-      rx = /((?:http|https):&#x2F;&#x2F;)?([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?/ig;
-      return Mustache.escape(text).replace(rx, function(match, protocol) {
+      rx = XRegExp('((?:http|https):&#x2F;&#x2F;)?([a-z0-9-\\p{L}]+\\.)?[a-z0-9-\\p{L}]+(\\.[a-z\\p{L}]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?', 'ig');
+      return XRegExp.replace(Mustache.escape(text), rx, function(match, protocol) {
         var url;
         url = protocol != null ? match : "//" + match;
         return "<a href=\"" + url + "\" target=\"_blank\">" + match + "</a>";

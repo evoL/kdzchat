@@ -41,8 +41,10 @@ class MessageView extends Spine.Controller
         content: @processMessage(@message.content)
 
     processMessage: (text) ->
-        rx = /((?:http|https):&#x2F;&#x2F;)?([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?/ig
-        Mustache.escape(text).replace rx, (match, protocol) ->
+        # rx = /((?:http|https):&#x2F;&#x2F;)?([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?/ig
+        # Mustache.escape(text).replace rx, (match, protocol) ->
+        rx = XRegExp('((?:http|https):&#x2F;&#x2F;)?([a-z0-9-\\p{L}]+\\.)?[a-z0-9-\\p{L}]+(\\.[a-z\\p{L}]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?', 'ig')
+        XRegExp.replace Mustache.escape(text), rx, (match, protocol) ->
             url = if protocol? then match else "//#{match}"
             "<a href=\"#{url}\" target=\"_blank\">#{match}</a>"
 
