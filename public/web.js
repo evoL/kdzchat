@@ -169,6 +169,18 @@
       var _this = this;
       ChatApp.__super__.constructor.apply(this, arguments);
       this.input.focus();
+      this.unread = 0;
+      this.focused = true;
+      this.baseTitle = document.title;
+      $(document).on({
+        show: function() {
+          _this.focused = true;
+          return _this.focusRestored();
+        },
+        hide: function() {
+          return _this.focused = false;
+        }
+      });
       UserMessage.bind('create', this.addMessage);
       SystemMessage.bind('create', this.addMessage);
       this.users = new UserList({
@@ -228,7 +240,10 @@
         });
       });
       this.socket.on('chat', function(msg) {
-        return UserMessage.create(msg);
+        UserMessage.create(msg);
+        if (!_this.focused) {
+          return _this.notify();
+        }
       });
     }
 
@@ -291,6 +306,14 @@
       });
       this.posts.append(view.render().el);
       return this.scrollArea.scrollTop(this.posts.height());
+    };
+
+    ChatApp.prototype.focusRestored = function() {
+      return document.title = this.baseTitle;
+    };
+
+    ChatApp.prototype.notify = function() {
+      return document.title = "(" + (++this.unread) + ") " + this.baseTitle;
     };
 
     ChatApp.prototype.randomizeNick = function() {

@@ -77,13 +77,27 @@ class ChatApp extends Spine.Controller
 
     constructor: ->
         super
+
+        # Automatically focus the input
         @input.focus()
+
+        # Enable notifications on lost focus
+        @unread = 0
+        @focused = true
+        @baseTitle = document.title
+        $(document).on
+            show: => 
+                @focused = true
+                @focusRestored()
+            hide: => 
+                @focused = false
 
         UserMessage.bind('create', @addMessage)
         SystemMessage.bind('create', @addMessage)
 
         @users = new UserList(el: @userlist)
 
+        # Socket setup
         @socket = io.connect("#{location.protocol}//#{location.hostname}:8999")
 
         @socket.on 'connect', =>
@@ -108,8 +122,9 @@ class ChatApp extends Spine.Controller
 
             SystemMessage.create(target: data.oldNick, content: 'is now called ' + data.nick)
 
-        @socket.on 'chat', (msg) ->
+        @socket.on 'chat', (msg) =>
             UserMessage.create msg
+            @notify() unless @focused
 
     submit: (e) ->
         e.preventDefault()
@@ -145,8 +160,16 @@ class ChatApp extends Spine.Controller
         @posts.append(view.render().el)
         @scrollArea.scrollTop(@posts.height())
 
+    focusRestored: ->
+        document.title = @baseTitle
+
+    notify: ->
+        document.title = "(#{++@unread}) #{@baseTitle}"
+
     randomizeNick: ->
         index = Math.floor(Math.random() * 100000);
         "guest#{index}"
+
+#########################################
 
 $ -> new ChatApp(el: $('#Viewport'))
