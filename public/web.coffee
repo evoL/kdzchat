@@ -85,6 +85,7 @@ class ChatApp extends Spine.Controller
         @unread = 0
         @focused = true
         @baseTitle = document.title
+        @sound = new buzz.sound('/drip', formats: ['ogg', 'mp3'])
         $(document).on
             show: => 
                 @focused = true
@@ -165,6 +166,7 @@ class ChatApp extends Spine.Controller
 
     notify: ->
         document.title = "(#{++@unread}) #{@baseTitle}"
+        @sound.play()
 
     randomizeNick: ->
         index = Math.floor(Math.random() * 100000);

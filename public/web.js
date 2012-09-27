@@ -172,6 +172,9 @@
       this.unread = 0;
       this.focused = true;
       this.baseTitle = document.title;
+      this.sound = new buzz.sound('/drip', {
+        formats: ['ogg', 'mp3']
+      });
       $(document).on({
         show: function() {
           _this.focused = true;
@@ -313,7 +316,8 @@
     };
 
     ChatApp.prototype.notify = function() {
-      return document.title = "(" + (++this.unread) + ") " + this.baseTitle;
+      document.title = "(" + (++this.unread) + ") " + this.baseTitle;
+      return this.sound.play();
     };
 
     ChatApp.prototype.randomizeNick = function() {
