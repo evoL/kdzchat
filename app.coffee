@@ -86,6 +86,8 @@ io.sockets.on 'connection', (socket) ->
         socket.user = null
 
     socket.on 'chat', (data) ->
+        return if data.content == ''
+
         socket.broadcast.emit 'chat', 
             authorId: socket.user.id
             content: data.content

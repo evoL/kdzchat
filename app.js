@@ -111,6 +111,9 @@
       return socket.user = null;
     });
     return socket.on('chat', function(data) {
+      if (data.content === '') {
+        return;
+      }
       return socket.broadcast.emit('chat', {
         authorId: socket.user.id,
         content: data.content
