@@ -148,7 +148,7 @@ class ChatApp extends Spine.Controller
     addMessage: (msg) =>
         view = new Messages(message: msg)
         @posts.append(view.render().el)
-        @scrollArea.scrollTop(@scrollArea.height())
+        @scrollArea.scrollTop(@posts.height())
 
     randomizeNick: ->
         index = Math.floor(Math.random() * 100000);

@@ -286,7 +286,7 @@
         message: msg
       });
       this.posts.append(view.render().el);
-      return this.scrollArea.scrollTop(this.scrollArea.height());
+      return this.scrollArea.scrollTop(this.posts.height());
     };
 
     ChatApp.prototype.randomizeNick = function() {

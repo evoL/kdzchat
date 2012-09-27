@@ -1,7 +1,7 @@
 {
     "name": "kokodzambo_chat",
     "description": "A webchat made with socket.io and Spine",
-    "version": "0.1",
+    "version": "0.1.0",
     "dependencies": {
         "socket.io": "0.9.10",
         "http-proxy": "0.8.3"
