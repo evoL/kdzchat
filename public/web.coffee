@@ -9,64 +9,36 @@ class User extends Spine.Model
             return 'This user already exists.'
 
 class Message extends Spine.Model
-    @configure 'Message', 'authorId', 'content'
+    @configure 'Message', 'target', 'content'
+
+class UserMessage extends Message
+    @configure 'UserMessage', 'authorId', 'content'
+
+    validate: ->
+        unless User.exists(@authorId)
+            "The user doesn't exist."
 
     constructor: ->
         super
 
-        match = @content.match(/^\/(\w+)\s+(.+)$/)
-        if match
-            @metadata = {command: match[1], argument: match[2]}        
+        @target = User.find(@authorId).nick
 
-    isSystemMessage: -> @metadata?
-
-    validate: ->
-        unless User.exists(@authorId)
-            "The user doesn't exist."
-
-class SystemMessage extends Spine.Model
-    @configure 'SystemMessage', 'authorId', 'content'    
-
-    isSystemMessage: -> true
-
-    validate: ->
-        unless User.exists(@authorId)
-            "The user doesn't exist."
+class SystemMessage extends Message
+    @configure 'SystemMessage'
 
 ##################################
 
-socket = io.connect("#{location.protocol}//#{location.hostname}:8999")
-
-class Messages extends Spine.Controller
+class MessageView extends Spine.Controller
     constructor: ->
         super
         @el.addClass 'post'
-        @el.addClass 'system' if @message.isSystemMessage()
 
-    messageContent: ->
-        return @processMessage(@message.content) unless @message.isSystemMessage()
-
-        metadata = @message.metadata
-
-        return @processMessage(@message.content) unless metadata
-
-        switch metadata.command
-            when 'nick'
-                user = User.find(@message.authorId)
-                user.nick = metadata.argument.replace(/\s+$/, '')
-
-                if user.save()
-                    socket.emit 'change nick', {id: @message.authorId, nick: user.nick}
-                    "is now called " + Mustache.escape(user.nick)
-                else
-                    msg = user.validate()
-                    "could not change his nick. " + msg
-            else
-                "tried to use an unknown command"
+        if @message.constructor.name == 'SystemMessage'
+            @el.addClass 'system'
 
     data: ->
-        author: User.find(@message.authorId).nick
-        content: @messageContent()
+        author: @message.target
+        content: @processMessage(@message.content)
 
     processMessage: (text) ->
         rx = /((?:http|https):&#x2F;&#x2F;)?([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(&#x2F;(?:[a-z0-9.,_~#&=;%+?-]|&#x2F;)*)?/ig
@@ -107,46 +79,69 @@ class ChatApp extends Spine.Controller
         super
         @input.focus()
 
-        Message.bind('create', @addMessage)
+        UserMessage.bind('create', @addMessage)
         SystemMessage.bind('create', @addMessage)
 
         @users = new UserList(el: @userlist)
 
-        socket.on 'connect', =>
-            socket.emit 'add user', {nick: @randomizeNick()}, (data, users) =>
+        @socket = io.connect("#{location.protocol}//#{location.hostname}:8999")
+
+        @socket.on 'connect', =>
+            @socket.emit 'add user', {nick: @randomizeNick()}, (data, users) =>
                 @user = User.create(id: data.id, nick: data.nick, current: true)
 
                 for uid, userdata of users
                     if uid != data.id
                         User.create(id: userdata.id, nick: userdata.nick, current: false)
 
-        socket.on 'user connected', (data) =>
+        @socket.on 'user connected', (data) =>
             data.current = false
             User.create data unless User.exists(data.id)
 
-            SystemMessage.create(authorId: data.id, content: 'has just connected')
-        socket.on 'user disconnected', (uid) ->
-            User.destroy uid
+            SystemMessage.create(target: data.nick, content: 'has just connected')
+        @socket.on 'user disconnected', (data) ->
+            User.destroy data.id
 
-            # SystemMessage.create(authorId: data.id, content: 'has disconnected')
-        socket.on 'nick changed', (data) ->
+            SystemMessage.create(target: data.nick, content: 'has disconnected')
+        @socket.on 'nick changed', (data) ->
             User.update data.id, nick: data.nick
 
-            SystemMessage.create(authorId: data.id, content: 'has changed his nick from ' + data.oldNick)
+            SystemMessage.create(target: data.oldNick, content: 'is now called ' + data.nick)
 
-        socket.on 'chat', (msg) ->
-            Message.create msg
+        @socket.on 'chat', (msg) ->
+            UserMessage.create msg
 
     submit: (e) ->
         e.preventDefault()
-        msg = Message.create(authorId: @user.id, content: @input.val())
-        unless msg.isSystemMessage()
-            socket.emit 'chat', {content: @input.val()}
+        value = @input.val()
+
+        # Check if posted a command
+        match = value.match(/^\/(\w+)(?:\s+(.+))?$/)
+        if match
+            @handleCommand(command: match[1], argument: match[2])
+        else
+            UserMessage.create(authorId: @user.id, content: value)
+            @socket.emit 'chat', {content: value}
 
         @input.val('')
 
+    handleCommand: (cmd) ->
+        switch cmd.command
+            when 'nick'
+                oldNick = @user.nick
+                @user.nick = cmd.argument.replace(/\s+$/, '')
+
+                if @user.save()
+                    @socket.emit 'change nick', {id: @user.id, nick: @user.nick}
+
+                    SystemMessage.create(target: oldNick, content: 'is now called ' + @user.nick)
+                else
+                    SystemMessage.create(target: oldNick, content: 'could not change his nick. ' + @user.validate())
+            else
+                SystemMessage.create(target: @user.nick, content: 'tried to use an unknown command')
+
     addMessage: (msg) =>
-        view = new Messages(message: msg)
+        view = new MessageView(message: msg)
         @posts.append(view.render().el)
         @scrollArea.scrollTop(@posts.height())
 

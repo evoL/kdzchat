@@ -127,7 +127,7 @@ a:hover {
 .chatinput { width: 100%; }
 
 // responsiveness
-@media all and (max-width: 600px) {
+@media all and (max-width: 640px) {
     .header { display: none; }
     .viewport { top: 0; }
     .sidebar {

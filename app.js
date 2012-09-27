@@ -107,7 +107,7 @@
     });
     socket.on('disconnect', function() {
       delete users[socket.user.id];
-      io.sockets.emit('user disconnected', socket.user.id);
+      io.sockets.emit('user disconnected', socket.user);
       return socket.user = null;
     });
     return socket.on('chat', function(data) {

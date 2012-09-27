@@ -82,7 +82,7 @@ io.sockets.on 'connection', (socket) ->
 
     socket.on 'disconnect', ->
         delete users[socket.user.id]
-        io.sockets.emit('user disconnected', socket.user.id)
+        io.sockets.emit('user disconnected', socket.user)
         socket.user = null
 
     socket.on 'chat', (data) ->

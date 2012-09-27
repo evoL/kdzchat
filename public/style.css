@@ -129,7 +129,7 @@ a:hover {
 .chatinput {
   width: 100%; }
 
-@media all and (max-width: 600px) {
+@media all and (max-width: 640px) {
   .header {
     display: none; }
 
