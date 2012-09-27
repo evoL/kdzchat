@@ -254,6 +254,9 @@
       var match, value;
       e.preventDefault();
       value = this.input.val();
+      if (value === '') {
+        return;
+      }
       match = value.match(/^\/(\w+)(?:\s+(.+))?$/);
       if (match) {
         this.handleCommand({

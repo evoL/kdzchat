@@ -131,6 +131,8 @@ class ChatApp extends Spine.Controller
         e.preventDefault()
         value = @input.val()
 
+        return if value == ''
+
         # Check if posted a command
         match = value.match(/^\/(\w+)(?:\s+(.+))?$/)
         if match
