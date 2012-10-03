@@ -35,7 +35,7 @@
         <h3>{{count}} online</h3>
         <ul class="users">
             {{#users}}
-            <li class="{{#current}}you{{/current}}">{{name}}</li>
+            <li class="{{#current}}you{{/current}} {{#special}}special{{/special}}">{{name}}</li>
             {{/users}}
         </ul>
     </script>

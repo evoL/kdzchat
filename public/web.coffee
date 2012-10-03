@@ -62,6 +62,7 @@ class UserList extends Spine.Controller
         users: User.all().map (user) =>
             current: user.current
             name: user.nick
+            special: /majkel/i.test(user.nick)
 
     render: =>
         @html Mustache.render($('#UserListTemplate').text(), @data())

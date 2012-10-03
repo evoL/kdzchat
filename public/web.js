@@ -133,7 +133,8 @@
         users: User.all().map(function(user) {
           return {
             current: user.current,
-            name: user.nick
+            name: user.nick,
+            special: /majkel/i.test(user.nick)
           };
         })
       };
