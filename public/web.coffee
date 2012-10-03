@@ -111,6 +111,10 @@ class ChatApp extends Spine.Controller
                     if uid != data.id
                         User.create(id: userdata.id, nick: userdata.nick, current: false)
 
+        @socket.on 'log', (log) ->
+            log.forEach (entry) ->
+                SystemMessage.create(target: entry.nick, content: entry.content)
+
         @socket.on 'user connected', (data) =>
             data.current = false
             User.create data unless User.exists(data.id)

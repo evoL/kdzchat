@@ -216,6 +216,14 @@
           return _results;
         });
       });
+      this.socket.on('log', function(log) {
+        return log.forEach(function(entry) {
+          return SystemMessage.create({
+            target: entry.nick,
+            content: entry.content
+          });
+        });
+      });
       this.socket.on('user connected', function(data) {
         data.current = false;
         if (!User.exists(data.id)) {

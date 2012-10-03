@@ -61,9 +61,13 @@ server = http.createServer (request, response) ->
 
 io = socketio.listen(server)
 users = {}
+log = []
+LOGSIZE = 50
 counter = 0
 
 io.sockets.on 'connection', (socket) ->
+    socket.emit 'log', log
+
     socket.on 'add user', (data, ack) ->
         data.id = 'user-' + counter++
         socket.user = data
@@ -81,12 +85,17 @@ io.sockets.on 'connection', (socket) ->
         socket.broadcast.emit('nick changed', data)
 
     socket.on 'disconnect', ->
-        delete users[socket.user.id]
-        io.sockets.emit('user disconnected', socket.user)
+        if socket.user?
+            delete users[socket.user.id]
+            io.sockets.emit('user disconnected', socket.user)
         socket.user = null
 
     socket.on 'chat', (data) ->
         return if data.content == ''
+
+        if log.length == LOGSIZE
+            log.shift()
+        log.push {nick: socket.user.nick, content: data.content}
 
         socket.broadcast.emit 'chat', 
             authorId: socket.user.id
